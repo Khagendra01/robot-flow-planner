@@ -28,7 +28,7 @@ class OrientedBox:
     def __post_init__(self) -> None:
         center = _vec3(self.center, "center").copy()
         size = _vec3(self.size, "size").copy()
-        rotation = np.asarray(self.rotation, dtype=np.float64)
+        rotation = np.array(self.rotation, dtype=np.float64, copy=True)
         if np.any(size <= 0):
             raise ValueError("box size components must be strictly positive")
         if rotation.shape != (3, 3) or not np.all(np.isfinite(rotation)):
@@ -41,7 +41,7 @@ class OrientedBox:
             array.setflags(write=False)
         object.__setattr__(self, "center", center)
         object.__setattr__(self, "size", size)
-        object.__setattr__(self, "rotation", rotation.copy())
+        object.__setattr__(self, "rotation", rotation)
         self.rotation.setflags(write=False)
 
 
