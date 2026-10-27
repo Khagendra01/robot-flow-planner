@@ -57,6 +57,8 @@ See NVIDIA's [Isaac Lab 3.0 installation instructions](https://docs.nvidia.com/i
 
 See [architecture and compatibility notes](docs/architecture.md).
 
+Windows workstation checkpoint, GitHub DNS troubleshooting, and the separate Isaac Lab 3.0 install route: [Windows next steps](docs/windows-next-steps.md).
+
 ## Versioning strategy
 
 Keep the geometry core in a lightweight Python environment. Use a **separate environment** for Isaac Lab 3.0 / Isaac Sim 6.2 (Python 3.12) and, if needed, a separate Linux environment or process for cuRobo CUDA extension builds. Do not blindly install an older cuRobo requirements file into the Isaac Lab environment.
