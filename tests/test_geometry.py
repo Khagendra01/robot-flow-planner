@@ -63,3 +63,10 @@ def test_segment_near_tiny_box():
     box = OrientedBox([0, 0, 0], [0.01, 0.01, 0.01], np.eye(3))
     cap = Capsule([0.015, -100, 0], [0.015, 100, 0], 0.0)
     assert capsule_box_clearance(cap, box) == pytest.approx(0.01)
+
+
+def test_box_does_not_freeze_caller_rotation():
+    rotation = np.eye(3)
+    OrientedBox([0, 0, 0], [1, 1, 1], rotation)
+    assert rotation.flags.writeable
+    rotation[0, 0] = 2.0
