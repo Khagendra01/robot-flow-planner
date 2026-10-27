@@ -11,18 +11,39 @@ Simulation-first research into joint-conditioned, collision-aware trajectory gen
 
 The geometry primitives are CPU-only and intentionally independent of simulator/PyTorch versions. A single primitive collision query is **not** a guarantee that a robot trajectory is collision-free.
 
-## Run the M0 checks on Windows PowerShell
+## Run M0 on Windows (Command Prompt / cmd.exe)
 
-~~~powershell
+Use **activate.bat in Command Prompt**, not Activate.ps1 (which belongs to PowerShell). The `(.venv)` prefix should appear in the prompt; `python` must resolve inside `.venv`, not the global Python installation.
+
+~~~bat
+cd %USERPROFILE%\Desktop\robot-flow-planner
 py -3.12 -m venv .venv
-.\.venv\Scripts\Activate.ps1
+.venv\Scripts\activate.bat
+where python
+python -c "import sys; print(sys.executable, 'venv active:', sys.prefix != sys.base_prefix)"
 python -m pip install -e ".[dev]"
 python -m pytest -q
 python scripts/demo_geometry.py
 python scripts/check_environment.py
 ~~~
 
-For Linux, activate with source .venv/bin/activate. Python 3.12 aligns with Isaac Lab 3.0, although this standalone geometry package can run on Python 3.10+.
+For **PowerShell**, use `.\.venv\Scripts\Activate.ps1` instead of `activate.bat`. For Linux, use `source .venv/bin/activate`. Python 3.12 is preferred to match Isaac Lab 3.0.
+
+## Enable CUDA PyTorch for the RTX 5090
+
+`nvidia-smi` reports the *driver-supported CUDA version*, not the version of CUDA available in your Python package. A version ending in `+cpu` has no GPU support. Inside the **activated** project environment, install NVIDIA Isaac Lab 3.0's pinned CUDA 13.0 versions:
+
+~~~bat
+python -m pip install torch==2.11.0 torchvision==0.26.0 --index-url https://download.pytorch.org/whl/cu130
+python scripts/check_environment.py
+python scripts/verify_cuda.py
+~~~
+
+`verify_cuda.py` runs an actual GPU matrix multiplication, not just a driver check. The official wheel index includes Windows Python 3.12 builds. A separate system-wide CUDA Toolkit is not necessary for ordinary prebuilt PyTorch wheels. If packages install under `AppData\Local\Programs\Python\Python312\Lib\site-packages`, the intended venv is likely **not** active.
+
+**Keep Isaac Lab/Isaac Sim in a separate environment** to avoid dependency conflicts. Isaac Sim 6.2 requires at least 32 GB of system RAM and 50 GB of SSD storage; confirm local availability before installing it.
+
+See NVIDIA's [Isaac Lab 3.0 installation instructions](https://docs.nvidia.com/isaaclab/3.0/isaac-lab/installation).
 
 ## Planned modules
 
