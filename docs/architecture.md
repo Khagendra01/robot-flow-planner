@@ -5,7 +5,10 @@
 - Windows NT build 26100 (Windows 11 family; the console prints 10.0).
 - NVIDIA RTX 5090, 32,607 MiB VRAM, WDDM driver 581.95.
 - nvidia-smi reports CUDA 13.0 as the driver-supported API level; this **does not** establish that a CUDA toolkit or CUDA-enabled PyTorch is installed.
-- CPU model, system RAM, disk space, installed Python and local Isaac Sim status are **unknown**. Run python scripts/check_environment.py and check those before installing the large simulator stack.
+- Diagnostic run on 2026-10-27: Windows 11 build 26100, Python 3.12.10; 12 of 12 geometry tests passed.
+- The executed interpreter imported `torch 2.14.1+cpu` (CUDA unavailable). Package locations indicated **global Python**, consistent with running a PowerShell activation script from Command Prompt. Use `.venv\Scripts\activate.bat` and verify `sys.prefix != sys.base_prefix` before installing CUDA PyTorch.
+- Official Isaac Lab 3.0 uses PyTorch `2.11.0` + CUDA 13.0 and has a Windows Python 3.12 wheel. Use `python -m pip install torch==2.11.0 torchvision==0.26.0 --index-url https://download.pytorch.org/whl/cu130` inside the activated project venv for the initial GPU smoke test. Prefer a separate environment for Isaac Lab itself.
+- CPU model, system RAM, disk space, and local Isaac Sim status are **unknown**. Isaac Sim 6.2 has minimum 32 GB system RAM, 50 GB SSD storage. Check available RAM/disk before installing the simulator stack.
 
 ## Compatibility decision
 
