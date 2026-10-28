@@ -67,6 +67,8 @@ After the Franka reports 9 DOFs, use the [M0-D scene snapshot instructions](docs
 
 After snapshot validation, run [M0-E scene analysis and collision-prim discovery](docs/m0-e-scene-analysis.md) using [offline frame diagnostics](scripts/analyze_scene_snapshot.py) and the [Isaac Sim collision inventory](scripts/isaac_sim_gui_collision_inventory.py). Frame distances are NOT robot-body collision clearances.
 
+With the 11 collider meshes identified, [M0-F mesh-envelope export](docs/m0-f-collider-bounds.md) derives per-link boxes from actual USD vertices with [this Script Editor exporter](scripts/isaac_sim_gui_collider_bounds.py), then [screens overlaps offline](scripts/analyze_collider_bounds.py). Bounding-box screening is **not** a trajectory-safety certificate.
+
 ## Versioning strategy
 
 Keep the geometry core in a lightweight Python environment. Use a **separate environment** for Isaac Lab 3.0 / Isaac Sim 6.2 (Python 3.12) and, if needed, a separate Linux environment or process for cuRobo CUDA extension builds. Do not blindly install an older cuRobo requirements file into the Isaac Lab environment.
