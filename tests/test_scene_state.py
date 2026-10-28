@@ -18,8 +18,10 @@ def example_snapshot():
         "sim_time_s": 3.2,
         "robot": {
             "joint_names": PANDA_JOINT_NAMES.copy(),
-            "joint_positions_rad": [0.0] * 9,
-            "joint_velocities_rad_s": [0.0] * 9,
+            "joint_positions": [0.0] * 9,
+            "joint_velocities": [0.0] * 9,
+            "joint_position_units": ["rad"] * 7 + ["m"] * 2,
+            "joint_velocity_units": ["rad/s"] * 7 + ["m/s"] * 2,
             "arm_dof_count": 7,
             "gripper_dof_count": 2,
             "links": [
@@ -44,8 +46,8 @@ def test_valid_scene_snapshot():
 
 def test_invalid_joint_vector():
     s = example_snapshot()
-    s["robot"]["joint_positions_rad"][2] = float("nan")
-    with pytest.raises(ValueError, match="joint_positions_rad"):
+    s["robot"]["joint_positions"][2] = float("nan")
+    with pytest.raises(ValueError, match="joint_positions"):
         validate_scene_snapshot(s)
 
 
