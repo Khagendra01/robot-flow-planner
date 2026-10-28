@@ -57,6 +57,16 @@ def validate_collection_bundle(data: dict) -> dict:
         drift, atol=1e-7, rtol=1e-6,
     ):
         raise ValueError("Reported joint drift does not match the source captures")
+    if "sim_time_delta_between_source_reads_s" in checks:
+        dt = float(bounds["simulation_time_s"] - scene["sim_time_s"])
+        if dt < -1e-7:
+            raise ValueError("Baseline simulation time went backwards")
+        recorded_dt = float(checks["sim_time_delta_between_source_reads_s"])
+        if not np.isclose(recorded_dt, dt, atol=1e-7):
+            raise ValueError("Incorrect baseline simulation time delta")
+        if checks.get("sim_time_advanced_between_source_reads") is not bool(dt > 1e-7):
+            raise ValueError("Baseline time-advance flag inconsistent")
+
     max_arm_speed = float(max(
         np.max(np.abs(scene["robot"]["joint_velocities"][:7])),
         np.max(np.abs(bounds["joint_velocities"][:7])),
