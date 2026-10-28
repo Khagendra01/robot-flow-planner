@@ -75,7 +75,11 @@ for name, vertices in prims:
     curves.CreateWrapAttr(UsdGeom.Tokens.nonperiodic)
     curves.CreateCurveVertexCountsAttr([2] * len(edge_indices))
     points = [
-        vertices[corner_index]
+        Gf.Vec3f(
+            float(vertices[corner_index][0]),
+            float(vertices[corner_index][1]),
+            float(vertices[corner_index][2]),
+        )
         for pair in edge_indices
         for corner_index in pair
     ]
