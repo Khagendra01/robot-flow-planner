@@ -45,8 +45,10 @@ def runtime_pose(path):
     return pos[0].tolist(), quat[0].tolist()
 
 
-def owner_link(prim):
-    current = prim
+def owner_link(collider_prim):
+    # CRITICAL: collider mesh may have the SAME name as its owning link.
+    # Start at the mesh PARENT, never at the collider itself.
+    current = collider_prim.GetParent()
     while current and current.IsValid():
         if current.GetName() in LINK_NAMES:
             return current
@@ -90,6 +92,11 @@ def capture():
         mesh_world = cache.GetLocalToWorldTransform(prim)
         link_world = cache.GetLocalToWorldTransform(link)
         mesh_to_link = mesh_world * link_world.GetInverse()
+        if link == prim or "/geometry/" in str(link.GetPath()):
+            raise RuntimeError(
+                "Collider owner must be a rigid-link ancestor, not the geometry mesh: "
+                + str(link.GetPath())
+            )
 
         vertices = []
         for point in points:
@@ -100,6 +107,19 @@ def capture():
         vertices = numpy_array(vertices)
         lower = vertices.min(axis=0)
         upper = vertices.max(axis=0)
+        dimensions_m = upper - lower
+        center_m = (lower + upper) * 0.5
+        # Guard against erroneously saving centimeter mesh coordinates as meters.
+        # Franka link-local collision extents cannot span multiple meters.
+        if (np.any(dimensions_m <= 0)
+                or np.max(dimensions_m) >= 2.0
+                or np.max(np.abs(center_m)) >= 2.0):
+            raise RuntimeError(
+                f"Physically implausible link-local mesh envelope for {prim.GetPath()}: "
+                f"center={center_m.tolist()} size={dimensions_m.tolist()} meters. "
+                "Check ancestor selection, mesh xformOp:scale, and USD units. "
+                "Do NOT use this export for collision analysis."
+            )
 
         link_path = str(link.GetPath())
         position, orientation = runtime_pose(link_path)
@@ -112,8 +132,8 @@ def capture():
             "mesh_approximation": str(
                 UsdPhysics.MeshCollisionAPI(prim).GetApproximationAttr().Get()
             ) if prim.HasAPI(UsdPhysics.MeshCollisionAPI) else None,
-            "local_center_m": ((lower + upper) * 0.5).tolist(),
-            "local_size_m": (upper - lower).tolist(),
+            "local_center_m": center_m.tolist(),
+            "local_size_m": dimensions_m.tolist(),
             "link_world_position_m": position,
             "link_world_orientation_wxyz": orientation,
         })
@@ -144,7 +164,9 @@ def capture():
 
     arm = Articulation(ARM)
     return {
-        "schema_version": "rfp.collider_bounds.v1",
+        "schema_version": "rfp.collider_bounds.v2",
+        "stage_meters_per_unit": 1.0,
+        "export_notes": "Link-local mesh vertices with authored mesh-to-rigid-link transforms; requires offline v2 validation.",
         "captured_utc": datetime.now(timezone.utc).isoformat(),
         "simulation_time_s": float(timeline.get_current_time()),
         "robot_prim_path": ARM,
