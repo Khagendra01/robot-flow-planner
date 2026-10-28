@@ -126,7 +126,10 @@ def _run_isaac_lab() -> int:
     parser.add_argument("--seed", type=int, default=42)
     add_launcher_args(parser)
     parser.set_defaults(device=None, visualizer=["none"])
-    args, hydra_args = setup_preset_cli(parser, sys.argv[1:])
+    requested = list(sys.argv[1:])
+    if not any(value.startswith("physics=") for value in requested):
+        requested.append("physics=isaacsim_physx")
+    args, hydra_args = setup_preset_cli(parser, requested)
     sys.argv = [sys.argv[0], *hydra_args]
     if args.envs < 1 or args.blocks < 1 or args.steps_per_block < 1:
         parser.error("--envs, --blocks and --steps-per-block must be positive")
