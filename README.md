@@ -69,6 +69,8 @@ After snapshot validation, run [M0-E scene analysis and collision-prim discovery
 
 With the 11 collider meshes identified, [M0-F mesh-envelope export](docs/m0-f-collider-bounds.md) derives per-link boxes from actual USD vertices with [this Script Editor exporter](scripts/isaac_sim_gui_collider_bounds.py), then [screens overlaps offline](scripts/analyze_collider_bounds.py). Bounding-box screening is **not** a trajectory-safety certificate.
 
+**M0-F correction:** The first real export exposed a mesh-as-link transform bug (multi-meter link sizes). The fixed exporter writes schema `rfp.collider_bounds.v2`, and the analyzer rejects v1. See the correction notes in [M0-F instructions](docs/m0-f-collider-bounds.md); re-export before using any bounds.
+
 ## Versioning strategy
 
 Keep the geometry core in a lightweight Python environment. Use a **separate environment** for Isaac Lab 3.0 / Isaac Sim 6.2 (Python 3.12) and, if needed, a separate Linux environment or process for cuRobo CUDA extension builds. Do not blindly install an older cuRobo requirements file into the Isaac Lab environment.
