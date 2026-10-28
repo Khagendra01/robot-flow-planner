@@ -47,8 +47,12 @@ def validate_scene_snapshot(snapshot: dict) -> dict:
         raise ValueError("Missing robot object")
     if robot.get("joint_names") != PANDA_JOINT_NAMES:
         raise ValueError("Unexpected Panda joint names or order")
-    _vector(robot.get("joint_positions_rad"), "joint_positions_rad", 9)
-    _vector(robot.get("joint_velocities_rad_s"), "joint_velocities_rad_s", 9)
+    _vector(robot.get("joint_positions"), "joint_positions", 9)
+    _vector(robot.get("joint_velocities"), "joint_velocities", 9)
+    if robot.get("joint_position_units") != ["rad"] * 7 + ["m"] * 2:
+        raise ValueError("Joint position units must distinguish revolute and prismatic DOFs")
+    if robot.get("joint_velocity_units") != ["rad/s"] * 7 + ["m/s"] * 2:
+        raise ValueError("Joint velocity units must distinguish revolute and prismatic DOFs")
     if robot.get("arm_dof_count") != 7 or robot.get("gripper_dof_count") != 2:
         raise ValueError("Unexpected Panda DOF partition")
 
