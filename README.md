@@ -71,6 +71,8 @@ With the 11 collider meshes identified, [M0-F mesh-envelope export](docs/m0-f-co
 
 **M0-F correction:** The first real export exposed a mesh-as-link transform bug (multi-meter link sizes). The fixed exporter writes schema `rfp.collider_bounds.v2`, and the analyzer rejects v1. See the correction notes in [M0-F instructions](docs/m0-f-collider-bounds.md); re-export before using any bounds.
 
+**Preferred workflow: ONE RUN.** With the Franka scene loaded and Play active, execute the [single-run collector](scripts/isaac_sim_gui_collect_all.py) once in Isaac Sim's Script Editor. It automatically collects joint/link data, collision inventory, real mesh envelopes, and an offline-style proxy overlap screen into **one JSON file**. See [one-run instructions](docs/one-run-collection.md). The older scripts remain available for debugging individual failures only.
+
 With v2 bounds passing offline checks, use the [M0-G Isaac Sim overlay guide](docs/m0-g-visualize-colliders.md) and [visualization script](scripts/isaac_sim_gui_visualize_collider_bounds.py) to inspect whether 11 link-aligned visual boxes enclose the actual robot; this does not validate PhysX collision margins.
 
 ## Versioning strategy
