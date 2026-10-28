@@ -80,11 +80,91 @@ def obb_separating_gap(a: OrientedBox, b: OrientedBox) -> float:
     return float(best)
 
 
+PANDA_COLLIDER_NAMES = {*(f"panda_link{i}" for i in range(8)),
+                        "panda_hand", "panda_leftfinger", "panda_rightfinger"}
+
+
+def validate_collider_bounds_snapshot(data: dict) -> dict:
+    """Check M0-F v2 schema, link ancestry, units and plausible dimensions.
+
+    These checks find obvious exporter failures; passing does NOT certify that
+    authored mesh envelopes match PhysX cooked bodies.
+    """
+    if not isinstance(data, dict) or data.get("schema_version") != "rfp.collider_bounds.v2":
+        raise ValueError(
+            "Invalid/legacy collider bounds snapshot: M0-F v1 contained a "
+            "mesh-as-link transform bug. Re-export with the v2 Isaac Sim script."
+        )
+    if not np.isclose(float(data.get("stage_meters_per_unit", -1)), 1.0):
+        raise ValueError("Stage scale must be 1 meter per USD unit")
+    from .scene_state import PANDA_JOINT_NAMES
+    if data.get("joint_names") != PANDA_JOINT_NAMES:
+        raise ValueError("Unexpected Panda joint ordering")
+    for key in ("joint_positions", "joint_velocities"):
+        values = np.asarray(data.get(key), dtype=np.float64)
+        if values.shape != (9,) or not np.all(np.isfinite(values)):
+            raise ValueError(f"{key} must have nine finite entries")
+    colliders = data.get("colliders")
+    if not isinstance(colliders, list) or len(colliders) != 11:
+        raise ValueError("Expected exactly 11 Franka collider envelopes")
+    if {c.get("link_owner") for c in colliders} != PANDA_COLLIDER_NAMES:
+        raise ValueError("Missing or repeated Panda collider owner")
+    seen_paths = set()
+    for c in colliders:
+        owner = c["link_owner"]
+        path = c.get("prim_path")
+        link_path = c.get("link_prim_path")
+        if not isinstance(path, str) or path in seen_paths:
+            raise ValueError("Collider prim paths must be unique")
+        seen_paths.add(path)
+        if (not isinstance(link_path, str)
+                or not link_path.endswith("/" + owner)
+                or "/geometry/" in link_path
+                or not path.startswith(link_path + "/")):
+            raise ValueError(
+                f"{owner}: owning link path must be a proper ancestor of mesh; "
+                "legacy v1 exports selected the mesh itself"
+            )
+        size = np.asarray(c.get("local_size_m"), dtype=np.float64)
+        center = np.asarray(c.get("local_center_m"), dtype=np.float64)
+        if (size.shape != (3,) or center.shape != (3,)
+                or not np.all(np.isfinite(size))
+                or not np.all(np.isfinite(center))
+                or np.any(size <= 0)
+                or float(np.max(size)) >= 2.0
+                or float(np.max(np.abs(center))) >= 2.0):
+            raise ValueError(f"{owner}: implausible link-local collider bounds in meters")
+        position = np.asarray(c.get("link_world_position_m"), dtype=np.float64)
+        if position.shape != (3,) or not np.all(np.isfinite(position)):
+            raise ValueError(f"{owner}: invalid live link position")
+        quaternion_wxyz_rotation(c.get("link_world_orientation_wxyz"))
+        if int(c.get("vertex_count", 0)) <= 0:
+            raise ValueError(f"{owner}: missing authored mesh vertices")
+    obstacles = data.get("obstacles")
+    if (not isinstance(obstacles, list) or len(obstacles) != 2
+            or {o.get("name") for o in obstacles} != {"Obstacle_Left", "Obstacle_Right"}):
+        raise ValueError("Expected two M0-C obstacle boxes")
+    for o in obstacles:
+        size = np.asarray(o.get("dimensions_m"), dtype=np.float64)
+        pos = np.asarray(o.get("position_m"), dtype=np.float64)
+        if (size.shape != (3,) or pos.shape != (3,)
+                or not np.all(np.isfinite(size)) or not np.all(np.isfinite(pos))
+                or np.any(size <= 0)):
+            raise ValueError("Invalid obstacle position or dimensions")
+        quaternion_wxyz_rotation(o.get("orientation_wxyz"))
+    return {
+        "schema_version": "rfp.collider_bounds.v2",
+        "collider_count": len(colliders),
+        "obstacle_count": len(obstacles),
+        "geometric_bounds_plausible": True,
+        "verified_physx_collision_geometry": False,
+    }
+
+
 def analyze_collider_envelopes(data: dict, padding_m: float = 0.0) -> dict:
     """Flag possible static-obstacle overlaps of proxy OBBs in one observation."""
-    if data.get("schema_version") != "rfp.collider_bounds.v1":
-        raise ValueError("Unsupported collider envelope snapshot schema")
-    colliders, obstacles = data.get("colliders"), data.get("obstacles")
+    validate_collider_bounds_snapshot(data)
+    colliders, obstacles = data["colliders"], data["obstacles"]
     if not isinstance(colliders, list) or not colliders or not isinstance(obstacles, list):
         raise ValueError("Need collider and obstacle lists")
     pairs = []
