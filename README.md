@@ -63,6 +63,8 @@ If Isaac Sim has opened but Windows admin prompts or read-only asset icons are c
 
 Once the falling-cube physics test is confirmed, follow the [Franka Panda GUI scene and joint-inspection guide](docs/franka-gui-test.md).
 
+After the Franka reports 9 DOFs, use the [M0-D scene snapshot instructions](docs/live-scene-snapshot.md) and [read-only Script Editor exporter](scripts/isaac_sim_gui_scene_snapshot.py) to save joint states, 8 live link frames, and 2 obstacle boxes. The [offline validator](scripts/validate_scene_snapshot.py) checks schema and units; snapshots remain local in ignored `outputs/`.
+
 ## Versioning strategy
 
 Keep the geometry core in a lightweight Python environment. Use a **separate environment** for Isaac Lab 3.0 / Isaac Sim 6.2 (Python 3.12) and, if needed, a separate Linux environment or process for cuRobo CUDA extension builds. Do not blindly install an older cuRobo requirements file into the Isaac Lab environment.
