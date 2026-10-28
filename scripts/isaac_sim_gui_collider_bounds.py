@@ -81,7 +81,7 @@ def capture():
             raise RuntimeError("Cannot find owning rigid link for " + str(prim.GetPath()))
         mesh = UsdGeom.Mesh(prim)
         points = mesh.GetPointsAttr().Get()
-        if not points:
+        if points is None or len(points) == 0:
             raise RuntimeError("No authored mesh vertices at " + str(prim.GetPath()))
 
         # OpenUSD uses row vectors; mesh->link equals (mesh->world)*(world->link).
