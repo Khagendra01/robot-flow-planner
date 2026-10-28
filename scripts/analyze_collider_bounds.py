@@ -27,7 +27,14 @@ def main():
             parser.error(f"No collider snapshots found in {directory}")
         path = candidates[-1]
     data = json.loads(path.read_text(encoding="utf-8"))
-    report = analyze_collider_envelopes(data, padding_m=args.padding_m)
+    try:
+        report = analyze_collider_envelopes(data, padding_m=args.padding_m)
+    except ValueError as exc:
+        raise SystemExit(
+            f"Rejected collider bounds export: {exc}\n"
+            "Run the corrected M0-F v2 exporter in Isaac Sim after git pull. "
+            "Do not train on older geometry exports."
+        ) from exc
     print("Source:", path)
     print("Authored collider envelopes:", len(data["colliders"]))
     print("Obstacles:", len(data["obstacles"]))
