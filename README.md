@@ -75,6 +75,8 @@ With the 11 collider meshes identified, [M0-F mesh-envelope export](docs/m0-f-co
 
 **M1-A (time sequence):** The original bundle validated one simulation timestamp, so it cannot measure trajectory motion. For 60 actual time-advancing observations **in a single Script Editor run**, use [M1-A one-run sequence collector](scripts/isaac_sim_gui_collect_sequence.py) and its [guide](docs/m1-a-one-run-sequences.md). The script automatically gathers a fresh full baseline and embeds all 60 frames in one JSON. No joint commands or physical collision labels.
 
+**M1-A verified on workstation:** 60 distinct 60 Hz observations (0.983 s of simulation), 11 robot-body poses and two static obstacle boxes per frame; 1,320 OBB proxy tests, no flagged proxy overlap. The robot moved substantially, but this was a passive rollout, NOT a goal-conditioned or physically collision-labeled demonstration. See [verified M1-A results](docs/m1-a-verified-results.md).
+
 With v2 bounds passing offline checks, use the [M0-G Isaac Sim overlay guide](docs/m0-g-visualize-colliders.md) and [visualization script](scripts/isaac_sim_gui_visualize_collider_bounds.py) to inspect whether 11 link-aligned visual boxes enclose the actual robot; this does not validate PhysX collision margins.
 
 ## Versioning strategy
