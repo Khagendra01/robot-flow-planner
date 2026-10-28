@@ -61,6 +61,8 @@ Windows workstation checkpoint, GitHub DNS troubleshooting, and the separate Isa
 
 If Isaac Sim has opened but Windows admin prompts or read-only asset icons are confusing, run the asset-free [GUI/physics smoke test](docs/isaac-sim-gui-smoke-test.md) with [this Script Editor example](scripts/isaac_sim_gui_smoke.py).
 
+Once the falling-cube physics test is confirmed, follow the [Franka Panda GUI scene and joint-inspection guide](docs/franka-gui-test.md).
+
 ## Versioning strategy
 
 Keep the geometry core in a lightweight Python environment. Use a **separate environment** for Isaac Lab 3.0 / Isaac Sim 6.2 (Python 3.12) and, if needed, a separate Linux environment or process for cuRobo CUDA extension builds. Do not blindly install an older cuRobo requirements file into the Isaac Lab environment.
