@@ -163,6 +163,10 @@ def collect_all():
         "checks": checks,
     }
 
+    from robot_flow_planner.collection_bundle import validate_collection_bundle
+    bundle_summary = validate_collection_bundle(bundle)
+    print("Unified bundle validation:", bundle_summary["schema_version"], "PASS")
+
     folder = PROJECT / "outputs" / "collections"
     folder.mkdir(parents=True, exist_ok=True)
     destination = folder / (
