@@ -78,8 +78,6 @@ def capture():
     # Resolve actual link prim paths from this particular referenced USD asset;
     # do not assume a fixed hierarchy within the Franka reference.
     link_paths = {}
-    for prim in robot_root.GetAllChildren():
-        pass  # prim hierarchy can contain many nested transforms
     from pxr import Usd
     for prim in Usd.PrimRange(robot_root):
         match = LINK_RE.fullmatch(prim.GetName())
