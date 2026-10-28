@@ -1,5 +1,31 @@
 # M0-F: From Franka collision meshes to conservative link-local boxes
 
+## Critical correction after the first real Franka export (M0-F v2)
+
+The first export `franka_bounds_20261028T005404210870Z.json` **must not be used for training or collision evaluation**. It contained a discovered bug:
+
+- Mesh prims and their owning rigid link share names (for example `panda_link0`).
+- The original exporter started owner lookup at the **mesh itself**, so `link_prim_path` incorrectly pointed at `.../geometry/panda_link0`.
+- The mesh-to-link transformation therefore became the identity and failed to apply the authored hierarchy's scaling. This produced impossible 10–30 **meter** link extents.
+
+The corrected exporter starts ownership lookup at `collider_prim.GetParent()` and computes mesh-to-*rigid-link* coordinates, including authored scale. It emits schema `rfp.collider_bounds.v2` and refuses to save any link-local box wider than 2 m in any dimension or with a center offset greater than 2 m. These are intentionally loose Franka-specific sanity limits, **not** calibrated collision tolerances.
+
+The offline OBB analyzer now rejects schema v1. Re-export from the updated Script Editor script; do **not** multiply the old dimensions by a guessed factor of 0.01. The correct transform may include rotations and offsets as well as scale.
+
+A successful v2 export must show:
+
+- all 11 distinct collider owners
+- `link_prim_path` ending in e.g. `/Arm/panda_link0`, **not** `/geometry/panda_link0`
+- plausible measured dimensions in meters
+- a passing `python scripts/analyze_collider_bounds.py` validation (still only a conservative proxy screening result)
+
+### Validation before trusting any result
+
+Even after a plausible export, inspect or visualize each oriented box in Isaac Sim. The bounds enclose the **authored collision mesh vertices**, not necessarily the fully cooked PhysX collision representation. Test collision queries, gripper motion, rigid-frame transform alignment and time-sampled trajectories independently. Do not assign collision-free learning labels until these are validated.
+
+---
+
+
 The user supplied the M0-E collision inventory, confirming **11 enabled Mesh collision prims**: panda_link0..7, panda_hand, panda_leftfinger, panda_rightfinger. All eleven report `mesh_approximation = convexHull`.
 
 **Important:** The inventory contains mesh prim paths and collision APIs, but not vertices, sizes, or link-local offsets. It cannot by itself give physical clearance. M0-F reads the authored mesh points directly in Isaac Sim, transforms them into the owning link coordinate system, then fits a link-aligned bounding box to each collider. These 11 boxes track actual live link poses.
