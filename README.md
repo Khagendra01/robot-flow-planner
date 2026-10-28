@@ -73,6 +73,8 @@ With the 11 collider meshes identified, [M0-F mesh-envelope export](docs/m0-f-co
 
 **Preferred workflow: ONE RUN.** With the Franka scene loaded and Play active, execute the [single-run collector](scripts/isaac_sim_gui_collect_all.py) once in Isaac Sim's Script Editor. It automatically collects joint/link data, collision inventory, real mesh envelopes, and an offline-style proxy overlap screen into **one JSON file**. See [one-run instructions](docs/one-run-collection.md). The older scripts remain available for debugging individual failures only.
 
+**M1-A (time sequence):** The original bundle validated one simulation timestamp, so it cannot measure trajectory motion. For 60 actual time-advancing observations **in a single Script Editor run**, use [M1-A one-run sequence collector](scripts/isaac_sim_gui_collect_sequence.py) and its [guide](docs/m1-a-one-run-sequences.md). The script automatically gathers a fresh full baseline and embeds all 60 frames in one JSON. No joint commands or physical collision labels.
+
 With v2 bounds passing offline checks, use the [M0-G Isaac Sim overlay guide](docs/m0-g-visualize-colliders.md) and [visualization script](scripts/isaac_sim_gui_visualize_collider_bounds.py) to inspect whether 11 link-aligned visual boxes enclose the actual robot; this does not validate PhysX collision margins.
 
 ## Versioning strategy
