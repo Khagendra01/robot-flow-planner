@@ -65,6 +65,8 @@ Once the falling-cube physics test is confirmed, follow the [Franka Panda GUI sc
 
 After the Franka reports 9 DOFs, use the [M0-D scene snapshot instructions](docs/live-scene-snapshot.md) and [read-only Script Editor exporter](scripts/isaac_sim_gui_scene_snapshot.py) to save joint states, 8 live link frames, and 2 obstacle boxes. The [offline validator](scripts/validate_scene_snapshot.py) checks schema and units; snapshots remain local in ignored `outputs/`.
 
+After snapshot validation, run [M0-E scene analysis and collision-prim discovery](docs/m0-e-scene-analysis.md) using [offline frame diagnostics](scripts/analyze_scene_snapshot.py) and the [Isaac Sim collision inventory](scripts/isaac_sim_gui_collision_inventory.py). Frame distances are NOT robot-body collision clearances.
+
 ## Versioning strategy
 
 Keep the geometry core in a lightweight Python environment. Use a **separate environment** for Isaac Lab 3.0 / Isaac Sim 6.2 (Python 3.12) and, if needed, a separate Linux environment or process for cuRobo CUDA extension builds. Do not blindly install an older cuRobo requirements file into the Isaac Lab environment.
