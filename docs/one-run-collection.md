@@ -20,7 +20,7 @@ git pull origin main
 
 In Isaac Sim:
 
-1. Open the Franka scene with \`/World/RFP_Franka/Arm\`.
+1. Open the Franka scene with `/World/RFP_Franka/Arm`.
 2. Press **Play** once; the script needs initialized runtime articulation data.
 3. Open **Window > Script Editor**. Paste and Run:
 
@@ -67,15 +67,15 @@ python scripts/inspect_collection.py
 
 ## Contents of one combined JSON
 
-- \`scene_snapshot\`: 9 measured joint positions and velocities, correct units
+- `scene_snapshot`: 9 measured joint positions and velocities, correct units
   (7 revolute and 2 prismatic), 8 robot link-world poses, 2 obstacles.
-- \`collision_inventory\`: 11 actual mesh collider prims and authored APIs.
-- \`collider_bounds\`: 11 link-local boxes derived from authored mesh points,
+- `collision_inventory`: 11 actual mesh collider prims and authored APIs.
+- `collider_bounds`: 11 link-local boxes derived from authored mesh points,
   with corresponding live world poses; v2 only.
-- \`checks\`: schema checks, inventory agreement, stationary data-quality
+- `checks`: schema checks, inventory agreement, stationary data-quality
   heuristic, change in joint positions across sequential captures, 22 OBB
   comparisons, explicit declaration that **there are no collision-free labels**.
-- \`source_files\`: original sidecar paths and capture provenance.
+- `source_files`: original sidecar paths and capture provenance.
 
 **Caution:** The three source samples occur sequentially in a single Script
 Editor execution and are **not** guaranteed to be atomically synchronized to a
@@ -90,7 +90,7 @@ ground-contact, self-collision or safe-stop guarantee is made.
 ## If the run fails
 
 Paste only the **first traceback**, not the entire Kit log. Errors about
-\`Press Play\` mean the timeline was not running; errors about missing Franka
+`Press Play` mean the timeline was not running; errors about missing Franka
 mean the M0-C scene wasn't loaded. The program never attempts to run an
 elevated Python interpreter.
 
