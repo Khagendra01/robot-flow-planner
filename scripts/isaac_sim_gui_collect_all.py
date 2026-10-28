@@ -134,6 +134,9 @@ def collect_all():
         np.max(np.abs(bounds["joint_velocities"][:7])),
     ))
     report = analyze_collider_envelopes(bounds, padding_m=0.01)
+    sim_delta = float(bounds["simulation_time_s"] - scene["sim_time_s"])
+    if sim_delta < -1e-7:
+        raise RuntimeError("Physics timeline went backwards during baseline export")
 
     checks = {
         "scene_schema": scene_check,
@@ -141,6 +144,8 @@ def collect_all():
         "inventory_matches_bounds": True,
         "obstacle_names_match": True,
         "max_joint_position_drift_native_units": drift,
+        "sim_time_advanced_between_source_reads": bool(sim_delta > 1e-7),
+        "sim_time_delta_between_source_reads_s": sim_delta,
         "max_absolute_arm_speed_rad_s": max_arm_speed,
         "stationary_by_0_05_rad_s_heuristic": bool(max_arm_speed <= 0.05),
         "pairwise_obb_screen": report,
@@ -190,7 +195,11 @@ def collect_all():
     print("Proxy boxes touching/overlapping:",
           len(report["possibly_overlapping_pairs"]))
     print("Maximum joint-state drift between captures (mixed rad/m):", drift)
+    print("Simulation time advanced between baseline reads:", sim_delta > 1e-7)
     print("Peak arm-joint speed during captures (rad/s):", max_arm_speed)
+    if sim_delta <= 1e-7:
+        print("NOTE: Physics time did not advance between source reads. "
+              "Zero joint drift is NOT evidence of a stationary arm.")
     if max_arm_speed > 0.05 or drift > 0.01:
         print("WARNING: Robot moved during collection. This is NOT a "
               "time-synchronized stationary observation.")
